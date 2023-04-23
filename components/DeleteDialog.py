@@ -4,10 +4,11 @@ from components.DatabaseConnection import DatabaseConnection
 
 
 class DeleteDialog(QDialog):
-    def __init__(self, table, reload_function):
+    def __init__(self, table, reload_function, update_status_bar_function):
         super().__init__()
         self.table = table
         self.reload = reload_function
+        self.update_status_bar_function = update_status_bar_function
         self.setWindowTitle('Delete Student')
 
         layout = QGridLayout()
@@ -34,7 +35,7 @@ class DeleteDialog(QDialog):
         connection = DatabaseConnection().connect()
         cursor = connection.cursor()
         cursor.execute(
-            'DELETE FROM students WHERE id = ?',
+            'DELETE FROM students WHERE id = %s',
             # Adding , after the value to make it a tuple. Or otherwise, it would be treated as self.selected_student_ID
             (
                 self.selected_student_ID,
@@ -46,6 +47,12 @@ class DeleteDialog(QDialog):
         connection.close()
 
         self.reload()
+
+        # After searching a user, deleting him, if the status bar remains, when we edit, we would try to access
+        # None.text(), and would crash the program. To prevent this, we hide the status bar after deleting an entry.
+        self.table.setCurrentCell(-1, -1)
+        self.update_status_bar_function()
+
         self.close()
 
         """

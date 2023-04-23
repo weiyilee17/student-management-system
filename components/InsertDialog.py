@@ -36,7 +36,7 @@ class InsertDialog(QDialog):
         connection = DatabaseConnection().connect()
         cursor = connection.cursor()
         cursor.execute(
-            'INSERT INTO students (name, course, mobile) VALUES (?, ?, ?)',
+            'INSERT INTO students (name, course, mobile) VALUES (%s, %s, %s)',
             # The course name can be replaced by self.course_name.itemText(self.course_name.current_index())
             (
                 self.student_name_line_edit.text(),

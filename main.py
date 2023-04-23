@@ -75,9 +75,18 @@ class MainWindow(QMainWindow):
             self.status_bar.addWidget(edit_button)
             self.status_bar.addWidget(delete_button)
 
+        # If no users are selected, the status bar should be hidden
+        selected_row_index = self.table.currentRow()
+
+        self.status_bar.hide() if selected_row_index == -1 else self.status_bar.show()
+
     def load_students(self):
         connection = DatabaseConnection().connect()
-        all_students = connection.execute('SELECT * FROM students')
+        cursor = connection.cursor()
+
+        cursor.execute('SELECT * FROM students')
+
+        all_students = cursor.fetchall()
 
         # When ever the program starts, it always starts at the beginning,
         # not from where it ended(which would be attaching)
@@ -89,6 +98,7 @@ class MainWindow(QMainWindow):
             for col_index, col_data in enumerate(row_data):
                 self.table.setItem(row_index, col_index, QTableWidgetItem(str(col_data)))
 
+        cursor.close()
         connection.close()
 
     def create_add_student_dialog(self):
@@ -104,7 +114,7 @@ class MainWindow(QMainWindow):
         dialog.exec()
 
     def create_delete_cell_dialog(self):
-        dialog = DeleteDialog(self.table, self.load_students)
+        dialog = DeleteDialog(self.table, self.load_students, self.handle_cell_click)
         dialog.exec()
 
     def create_about_message_box(self):

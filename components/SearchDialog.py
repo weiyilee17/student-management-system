@@ -45,5 +45,10 @@ class SearchDialog(QDialog):
 
         connection.close()
 
+        # Not sure why the current cell row is 0 if we search for a record that doesn't exist.
+        # Hide the status bar since there is no match for search results.
+        if not search_results:
+            self.table.setCurrentCell(-1, -1)
+
         self.focus_on_selected_cell()
         self.close()

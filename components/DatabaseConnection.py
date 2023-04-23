@@ -1,10 +1,26 @@
-from sqlite3 import connect
+from os import getenv
+
+from mysql.connector import connect
 
 
 class DatabaseConnection:
-    def __init__(self, database_file='database.db'):
-        self.database_file = database_file
+    def __init__(self,
+                 host='localhost',
+                 user=getenv('MYSQL_USERNAME'),
+                 password=getenv('MYSQL_PASSWORD'),
+                 database='school'
+                 ):
+        self.host = host
+        self.user = user
+        self.password = password
+        self.database = database
 
     def connect(self):
-        connection = connect(self.database_file)
+        connection = connect(
+            host=self.host,
+            user=self.user,
+            password=self.password,
+            database=self.database
+        )
+
         return connection
