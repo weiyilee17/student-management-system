@@ -3,6 +3,7 @@ from sys import argv, exit
 from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtWidgets import QApplication, QMainWindow, \
     QTableWidget, QTableWidgetItem, QPushButton, QToolBar, QStatusBar
+from mysql.connector import Error
 
 from components.AboutMessageBox import AboutMessageBox
 from components.DatabaseConnection import DatabaseConnection
@@ -81,22 +82,28 @@ class MainWindow(QMainWindow):
         self.status_bar.hide() if selected_row_index == -1 else self.status_bar.show()
 
     def load_students(self):
-        connection = DatabaseConnection().connect()
-        cursor = connection.cursor()
+        try:
+            connection = DatabaseConnection().connect()
+            cursor = connection.cursor()
 
-        cursor.execute('SELECT * FROM students')
+            cursor.execute('SELECT * FROM students')
 
-        all_students = cursor.fetchall()
+            all_students = cursor.fetchall()
 
-        # When ever the program starts, it always starts at the beginning,
-        # not from where it ended(which would be attaching)
-        self.table.setRowCount(0)
+            # When ever the program starts, it always starts at the beginning,
+            # not from where it ended(which would be attaching)
+            self.table.setRowCount(0)
 
-        for row_index, row_data in enumerate(all_students):
-            self.table.insertRow(row_index)
+            for row_index, row_data in enumerate(all_students):
+                self.table.insertRow(row_index)
 
-            for col_index, col_data in enumerate(row_data):
-                self.table.setItem(row_index, col_index, QTableWidgetItem(str(col_data)))
+                for col_index, col_data in enumerate(row_data):
+                    self.table.setItem(row_index, col_index, QTableWidgetItem(str(col_data)))
+        except Error as err:
+            print(f'MySQL Error: {err}')
+            print(f'Error code: {err.errno}')
+
+        print(f'Warnings: ', cursor.warnings)
 
         cursor.close()
         connection.close()
